@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能视觉分析平台</title>
+    <link href="[https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"](https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css") rel="stylesheet">
+    <style>
+        /* 基础样式 */
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .dark {
+            color-scheme: dark;
+        }
+        
+        /* 自定义渐变背景 */
+        .bg-gradient-custom {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        }
+        
+        .dark .bg-gradient-custom {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+        }
+        
+        /* 呼吸动画 */
+        @keyframes breathe {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(66, 153, 225, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(66, 153, 225, 0.4);
+            }
+        }
+        
+        .breathe-effect {
+            animation: breathe 3s infinite ease-in-out;
+        }
+        
+        /* 标签页样式 */
+        .tab {
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-color: #4299e1;
+            color: #4299e1;
+        }
+        
+        .dark .tab.active {
+            border-color: #63b3ed;
+            color: #63b3ed;
+        }
+        
+        /* 视频容器样式 */
+        .video-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            background-color: #000;
+        }
+        
+        #videoFeed {
+            transform: scaleX(-1);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 自定义按钮 */
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background-color: #a0aec0;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #718096;
+            transform: translateY(-2px);
+        }
+        
+        /* 加载动画 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4299e1;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        .dark .spinner {
+            border-color: rgba(255, 255, 255, 0.1);
+            border-left-color: #63b3ed;
+        }
+        
+        /* 图片预览 */
+        .image-preview {
+            max-height: 400px;
+            object-fit: contain;
+        }
+        
+        /* 隐藏元素 */
+        .hidden {
+            display: none;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-custom min-h-screen">
+    <canvas id="canvas" class="hidden"></canvas> <!-- 用于捕获视频帧 -->
+    
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- 头部 -->
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">智能视觉分析平台</h1>
+            
+            <div class="flex items-center space-x-4">
+                <!-- 语言切换 -->
+                <select id="languageSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm">
+                    <option value="zh" selected>中文</option>
+                    <option value="en">English</option>
+                </select>
+                
+                <!-- 主题切换 -->
+                <button id="themeToggle" class="p-2 rounded-full bg-white dark:bg-gray-700 shadow-md">
+                    <!-- 月亮图标 (深色模式) -->
+                    <svg id="moonIcon" xmlns="[http://www.w3.org/2000/svg"](http://www.w3.org/2000/svg") class="h-6 w-6 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                    <!-- 太阳图标 (浅色模式) -->
+                    <svg id="sunIcon" xmlns="[http://www.w3.org/2000/svg"](http://www.w3.org/2000/svg") class="h-6 w-6 text-yellow-500 hidden" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+        
+        <!-- API配置 -->
+        <div class="mb-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+            <div class="flex flex-col md:flex-row md:items-center gap-4">
+                <label for="baseURL" class="text-gray-700 dark:text-gray-300 font-medium">API 地址:</label>
+                <input id="baseURL" type="text" value="http://localhost:11434" class="flex-grow px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+        
+        <!-- 标签页导航 -->
+        <div class="tabs flex space-x-8 border-b border-gray-200 dark:border-gray-700 mb-6">
+            <div id="cameraTab" class="tab active py-3 px-1 text-lg font-medium" data-tab="camera">
+                <span class="i18n" data-key="camera">摄像头监控</span>
+            </div>
+            <div id="uploadTab" class="tab py-3 px-1 text-lg font-medium" data-tab="upload">
+                <span class="i18n" data-key="upload">图片上传</span>
+            </div>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="tab-content">
+            <!-- 摄像头监控面板 -->
+            <div id="cameraPanel" class="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg breathe-effect">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- 左侧：视频显示 -->
+                    <div class="video-container aspect-w-4 aspect-h-3 h-[400px]">
+                        <video id="videoFeed" autoplay playsinline></video>
+                    </div>
+                    
+                    <!-- 右侧：控制和结果 -->
+                    <div class="flex flex-col h-full">
+                        <!-- 指令输入 -->
+                        <div class="mb-4">
+                            <label for="instructionText" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                                <span class="i18n" data-key="instruction">指令:</span>
+                            </label>
+                            <textarea id="instructionText" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        </div>
+                        
+                        <!-- 结果显示 -->
+                        <div class="flex-grow mb-4">
+                            <label for="responseText" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                                <span class="i18n" data-key="result">分析结果:</span>
+                            </label>
+                            <div class="relative flex-grow">
+                                <textarea id="responseText" rows="8" readonly class="w-full h-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none resize-none"></textarea>
+                                <div id="cameraLoading" class="hidden absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80">
+                                    <div class="spinner"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 控制按钮 -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <label for="intervalSelect" class="text-gray-700 dark:text-gray-300">
+                                    <span class="i18n" data-key="interval">请求间隔:</span>
+                                </label>
+                                <select id="intervalSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2">
+                                    <option value="1000">1s</option>
+                                    <option value="5000" selected>5s</option>
+                                    <option value="10000">10s</option>
+                                </select>
+                            </div>
+                            
+                            <button id="startButton" class="btn-primary px-6 py-3 rounded-lg font-medium shadow-md flex items-center justify-center">
+                                <span class="i18n" data-key="start">开始</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 图片上传面板 -->
+            <div id="uploadPanel" class="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg breathe-effect hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- 左侧：上传和预览 -->
+                    <div class="flex flex-col">
+                        <!-- 上传区域 -->
+                        <div class="mb-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors" id="dropArea">
+                            <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                            <svg xmlns="[http://www.w3.org/2000/svg"](http://www.w3.org/2000/svg") class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p class="mt-2 text-gray-600 dark:text-gray-400">
+                                <span class="i18n" data-key="dragImage">拖放图片到此处或</span>
+                                <span class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
+                                    <span class="i18n" data-key="browseFiles">浏览文件</span>
+                                </span>
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                <span class="i18n" data-key="supportedFormats">支持 JPG, PNG, GIF 等格式</span>
+                            </p>
+                        </div>
+                        
+                        <!-- 图片预览 -->
+                        <div id="imagePreviewContainer" class="hidden mb-4">
+                            <div class="relative">
+                                <img id="imagePreview" class="image-preview w-full rounded-lg shadow-md" alt="预览图片">
+                                <button id="removeImage" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p id="imageInfo" class="mt-2 text-sm text-gray-600 dark:text-gray-400"></p>
+                        </div>
+                        
+                        <!-- Base64输入 -->
+                        <div class="mb-4">
+                            <label for="base64Input" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                                <span class="i18n" data-key="base64Input">或输入Base64图片数据:</span>
+                            </label>
+                            <textarea id="base64Input" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        </div>
+                        
+                        <button id="analyzeButton" class="btn-primary px-6 py-3 rounded-lg font-medium shadow-md flex items-center justify-center mt-auto">
+                            <span class="i18n" data-key="analyze">分析图片</span>
+                        </button>
+                    </div>
+                    
+                    <!-- 右侧：指令和结果 -->
+                    <div class="flex flex-col h-full">
+                        <!-- 指令输入 -->
+                        <div class="mb-4">
+                            <label for="uploadInstructionText" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                                <span class="i18n" data-key="instruction">指令:</span>
+                            </label>
+                            <textarea id="uploadInstructionText" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        </div>
+                        
+                        <!-- 结果显示 -->
+                        <div class="flex-grow">
+                            <label for="uploadResponseText" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                                <span class="i18n" data-key="result">分析结果:</span>
+                            </label>
+                            <div class="relative flex-grow">
+                                <textarea id="uploadResponseText" rows="10" readonly class="w-full h-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none resize-none"></textarea>
+                                <div id="uploadLoading" class="hidden absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80">
+                                    <div class="spinner"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <footer class="mt-12 text-center text-gray-600 dark:text-gray-400 text-sm">
+            <p>&copy; 2025 智能视觉分析平台 | <span class="i18n" data-key="poweredBy">基于 Qwen-2.5-VL 模型</span></p>
+        </footer>
+    </div>
+
+    <script>
+        // 语言配置
+        const translations = {
+            zh: {
+                appTitle: "智能视觉分析平台",
+                camera: "摄像头监控",
+                upload: "图片上传",
+                instruction: "指令:",
+                result: "分析结果:",
+                interval: "请求间隔:",
+                start: "开始",
+                stop: "停止",
+                analyze: "分析图片",
+                dragImage: "拖放图片到此处或",
+                browseFiles: "浏览文件",
+                supportedFormats: "支持 JPG, PNG, GIF 等格式",
+                base64Input: "或输入Base64图片数据:",
+                poweredBy: "基于 Qwen-2.5-VL 模型",
+                processingStarted: "处理已开始...",
+                processingStopped: "处理已停止。",
+                cameraNotAvailable: "摄像头不可用。请先授予权限。",
+                failedToCapture: "无法捕获图像。视频流可能未激活。",
+                uploadImage: "请上传图片或输入Base64数据",
+                analyzing: "分析中...",
+                fileInfo: "文件名: {0}, 大小: {1} KB",
+                largeFileWarning: "警告: 图片大于800KB，可能导致请求缓慢。"
+            },
+            en: {
+                appTitle: "Intelligent Visual Analysis Platform",
+                camera: "Camera Monitoring",
+                upload: "Image Upload",
+                instruction: "Instruction:",
+                result: "Analysis Result:",
+                interval: "Request Interval:",
+                start: "Start",
+                stop: "Stop",
+                analyze: "Analyze Image",
+                dragImage: "Drop image here or",
+                browseFiles: "Browse Files",
+                supportedFormats: "Supports JPG, PNG, GIF formats",
+                base64Input: "Or input Base64 image data:",
+                poweredBy: "Powered by Qwen-2.5-VL Model",
+                processingStarted: "Processing started...",
+                processingStopped: "Processing stopped.",
+                cameraNotAvailable: "Camera not available. Please grant permission first.",
+                failedToCapture: "Failed to capture image. Stream might not be active.",
+                uploadImage: "Please upload an image or input Base64 data",
+                analyzing: "Analyzing...",
+                fileInfo: "Filename: {0}, Size: {1} KB",
+                largeFileWarning: "Warning: Image is larger than 800KB, which may cause slow requests."
+            }
+        };
+        
+        // 当前语言
+        let currentLanguage = 'zh';
+        
+        // DOM元素
+        const elements = {
+            // 通用元素
+            baseURL: document.getElementById('baseURL'),
+            themeToggle: document.getElementById('themeToggle'),
+            moonIcon: document.getElementById('moonIcon'),
+            sunIcon: document.getElementById('sunIcon'),
+            languageSelect: document.getElementById('languageSelect'),
+            
+            // 标签页
+            cameraTab: document.getElementById('cameraTab'),
+            uploadTab: document.getElementById('uploadTab'),
+            cameraPanel: document.getElementById('cameraPanel'),
+            uploadPanel: document.getElementById('uploadPanel'),
+            
+            // 摄像头相关
+            videoFeed: document.getElementById('videoFeed'),
+            canvas: document.getElementById('canvas'),
+            instructionText: document.getElementById('instructionText'),
+            responseText: document.getElementById('responseText'),
+            intervalSelect: document.getElementById('intervalSelect'),
+            startButton: document.getElementById('startButton'),
+            cameraLoading: document.getElementById('cameraLoading'),
+            
+            // 上传相关
+            dropArea: document.getElementById('dropArea'),
+            imageUpload: document.getElementById('imageUpload'),
+            imagePreviewContainer: document.getElementById('imagePreviewContainer'),
+            imagePreview: document.getElementById('imagePreview'),
+            removeImage: document.getElementById('removeImage'),
+            imageInfo: document.getElementById('imageInfo'),
+            base64Input: document.getElementById('base64Input'),
+            uploadInstructionText: document.getElementById('uploadInstructionText'),
+            uploadResponseText: document.getElementById('uploadResponseText'),
+            analyzeButton: document.getElementById('analyzeButton'),
+            uploadLoading: document.getElementById('uploadLoading')
+        };
+        
+        // 状态变量
+        let stream;
+        let intervalId;
+        let isProcessing = false;
+        let isDarkMode = false;
+        
+        // 初始化函数
+        function init() {
+            // 设置默认指令
+            elements.instructionText.value = "用中文描述你看到了什么";
+            elements.uploadInstructionText.value = "用中文描述这张图片";
+            
+            // 初始化语言
+            updateLanguage(currentLanguage);
+            
+            // 绑定事件
+            bindEvents();
+            
+            // 初始化摄像头
+            initCamera();
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            // 主题切换
+            elements.themeToggle.addEventListener('click', toggleTheme);
+            
+            // 语言切换
+            elements.languageSelect.addEventListener('change', (e) => {
+                updateLanguage(e.target.value);
+            });
+            
+            // 标签页切换
+            elements.cameraTab.addEventListener('click', () => switchTab('camera'));
+            elements.uploadTab.addEventListener('click', () => switchTab('upload'));
+            
+            // 摄像头控制
+            elements.startButton.addEventListener('click', toggleProcessing);
+            
+            // 图片上传
+            elements.dropArea.addEventListener('click', () => elements.imageUpload.click());
+            elements.imageUpload.addEventListener('change', handleImageUpload);
+            elements.removeImage.addEventListener('click', clearImage);
+            elements.base64Input.addEventListener('input', handleBase64Input);
+            elements.analyzeButton.addEventListener('click', analyzeUploadedImage);
+            
+            // 拖放功能
+            elements.dropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                elements.dropArea.classList.add('border-blue-500');
+            });
+            
+            elements.dropArea.addEventListener('dragleave', () => {
+                elements.dropArea.classList.remove('border-blue-500');
+            });
+            
+            elements.dropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                elements.dropArea.classList.remove('border-blue-500');
+                
+                if (e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+        }
+        
+        // 更新语言
+        function updateLanguage(lang) {
+            currentLanguage = lang;
+            
+            // 更新所有带i18n类的元素
+            document.querySelectorAll('.i18n').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (key && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            
+            // 更新标题
+            document.title = translations[lang].appTitle;
+            
+            // 更新按钮文本
+            if (isProcessing) {
+                elements.startButton.querySelector('span').textContent = translations[lang].stop;
+            } else {
+                elements.startButton.querySelector('span').textContent = translations[lang].start;
+            }
+        }
+        
+        // 切换主题
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            
+            if (isDarkMode) {
+                document.documentElement.classList.add('dark');
+                elements.moonIcon.classList.add('hidden');
+                elements.sunIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                elements.moonIcon.classList.remove('hidden');
+                elements.sunIcon.classList.add('hidden');
+            }
+        }
+        
+        // 切换标签页
+        function switchTab(tab) {
+            if (tab === 'camera') {
+                elements.cameraTab.classList.add('active');
+                elements.uploadTab.classList.remove('active');
+                elements.cameraPanel.classList.remove('hidden');
+                elements.uploadPanel.classList.add('hidden');
+            } else {
+                elements.cameraTab.classList.remove('active');
+                elements.uploadTab.classList.add('active');
+                elements.cameraPanel.classList.add('hidden');
+                elements.uploadPanel.classList.remove('hidden');
+            }
+        }
+        
+        // 初始化摄像头
+        async function initCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                elements.videoFeed.srcObject = stream;
+                elements.responseText.value = "摄像头访问正常，可以开始处理了。";
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                elements.responseText.value = `Error accessing camera: ${err.name} - ${err.message}. Please ensure permissions are granted and you are on HTTPS or localhost.`;
+                alert(translations[currentLanguage].cameraNotAvailable);
+            }
+        }
+        
+        // 切换处理状态
+        function toggleProcessing() {
+            if (isProcessing) {
+                stopProcessing();
+            } else {
+                startProcessing();
+            }
+        }
+        
+        // 开始处理
+        function startProcessing() {
+            if (!stream) {
+                elements.responseText.value = translations[currentLanguage].cameraNotAvailable;
+                alert(translations[currentLanguage].cameraNotAvailable);
+                return;
+            }
+            
+            isProcessing = true;
+            elements.startButton.querySelector('span').textContent = translations[currentLanguage].stop;
+            elements.startButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            elements.startButton.classList.add('bg-red-500', 'hover:bg-red-600');
+            
+            elements.instructionText.disabled = true;
+            elements.intervalSelect.disabled = true;
+            
+            elements.responseText.value = translations[currentLanguage].processingStarted;
+            
+            const intervalMs = parseInt(elements.intervalSelect.value, 10);
+            
+            // 立即执行一次
+            sendData();
+            
+            // 设置定时器
+            intervalId = setInterval(sendData, intervalMs);
+        }
+        
+        // 停止处理
+        function stopProcessing() {
+            isProcessing = false;
+            
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+            
+            elements.startButton.querySelector('span').textContent = translations[currentLanguage].start;
+            elements.startButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+            elements.startButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            
+            elements.instructionText.disabled = false;
+            elements.intervalSelect.disabled = false;
+            
+            if (elements.responseText.value === translations[currentLanguage].processingStarted) {
+                elements.responseText.value = translations[currentLanguage].processingStopped;
+            }
+        }
+        
+        // 捕获图像
+        function captureImage() {
+            if (!stream || !elements.videoFeed.videoWidth) {
+                console.warn("Video stream not ready for capture.");
+                return null;
+            }
+            
+            elements.canvas.width = elements.videoFeed.videoWidth;
+            elements.canvas.height = elements.videoFeed.videoHeight;
+            const context = elements.canvas.getContext('2d');
+            context.drawImage(elements.videoFeed, 0, 0, elements.canvas.width, elements.canvas.height);
+            
+            return elements.canvas.toDataURL('image/jpeg', 0.8); // 使用JPEG格式，0.8质量
+        }
+        
+        // 发送数据
+        async function sendData() {
+            if (!isProcessing) return; // 确保不会有重叠的请求
+            
+            const instruction = elements.instructionText.value;
+            const imageBase64URL = captureImage();
+            
+            if (!imageBase64URL) {
+                elements.responseText.value = translations[currentLanguage].failedToCapture;
+                return;
+            }
+            
+            elements.cameraLoading.classList.remove('hidden');
+            
+            try {
+                const response = await sendChatCompletionRequest(instruction, imageBase64URL);
+                elements.responseText.value = response;
+            } catch (error) {
+                console.error('Error sending data:', error);
+                elements.responseText.value = `Error: ${error.message}`;
+            } finally {
+                elements.cameraLoading.classList.add('hidden');
+            }
+        }
+        
+        // 发送API请求
+        async function sendChatCompletionRequest(instruction, imageBase64URL) {
+            // 从imageBase64URL中提取纯Base64数据（去掉"data:image/jpeg;base64,"前缀）
+            const base64Data = imageBase64URL.split(',')[1];
+            
+            const response = await fetch(`${elements.baseURL.value}/api/generate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'qwen2.5vl:3b',
+                    prompt: instruction,
+                    stream: false,
+                    images: [base64Data]
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.text();
+                return `Server error: ${response.status} - ${errorData}`;
+            }
+            
+            const data = await response.json();
+            // Ollama API返回的是response字段
+            return data.response;
+        }
+        
+        // 处理图片上传
+        function handleImageUpload(e) {
+            if (e.target.files.length) {
+                handleFiles(e.target.files);
+            }
+        }
+        
+        // 处理文件
+        function handleFiles(files) {
+            const file = files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('请上传图片文件');
+                return;
+            }
+            
+            // 清除Base64输入
+            elements.base64Input.value = '';
+            
+            // 显示文件信息
+            const fileSizeKB = (file.size / 1024).toFixed(2);
+            elements.imageInfo.textContent = translations[currentLanguage].fileInfo.replace('{0}', file.name).replace('{1}', fileSizeKB);
+            
+            // 大文件警告
+            if (file.size > 800 * 1024) {
+                const warningSpan = document.createElement('span');
+                warningSpan.className = 'text-red-500 block mt-1';
+                warningSpan.textContent = translations[currentLanguage].largeFileWarning;
+                elements.imageInfo.appendChild(warningSpan);
+            }
+            
+            // 预览图片
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                elements.imagePreview.src = e.target.result;
+                elements.imagePreviewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // 处理Base64输入
+        function handleBase64Input() {
+            // 清除文件上传
+            elements.imageUpload.value = '';
+            elements.imageInfo.textContent = '';
+            
+            const base64Input = elements.base64Input.value.trim();
+            if (!base64Input) return;
+            
+            try {
+                // 检查是否已经包含data URL前缀
+                let imageData = base64Input;
+                if (!base64Input.startsWith('data:image')) {
+                    imageData = `data:image/jpeg;base64,${base64Input}`;
+                }
+                
+                // 预览图片
+                elements.imagePreview.src = imageData;
+                elements.imagePreviewContainer.classList.remove('hidden');
+                
+                // 显示信息
+                elements.imageInfo.textContent = 'Base64数据已加载';
+            } catch (error) {
+                console.error('Error parsing Base64:', error);
+                alert('无效的Base64数据');
+            }
+        }
+        
+        // 清除图片
+        function clearImage() {
+            elements.imagePreview.src = '';
+            elements.imagePreviewContainer.classList.add('hidden');
+            elements.imageInfo.textContent = '';
+            elements.imageUpload.value = '';
+            elements.base64Input.value = '';
+        }
+        
+        // 分析上传的图片
+        async function analyzeUploadedImage() {
+            // 获取图片数据
+            const imageData = elements.imagePreview.src;
+            if (!imageData) {
+                alert(translations[currentLanguage].uploadImage);
+                return;
+            }
+            
+            const instruction = elements.uploadInstructionText.value;
+            
+            // 显示加载状态
+            elements.uploadLoading.classList.remove('hidden');
+            elements.uploadResponseText.value = translations[currentLanguage].analyzing;
+            elements.analyzeButton.disabled = true;
+            
+            try {
+                const response = await sendChatCompletionRequest(instruction, imageData);
+                elements.uploadResponseText.value = response;
+            } catch (error) {
+                console.error('Error analyzing image:', error);
+                elements.uploadResponseText.value = `Error: ${error.message}`;
+            } finally {
+                elements.uploadLoading.classList.add('hidden');
+                elements.analyzeButton.disabled = false;
+            }
+        }
+        
+        // 页面加载时初始化
+        window.addEventListener('DOMContentLoaded', init);
+        
+        // 页面关闭时清理资源
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        });
+    </script>
+</body>
+</html>
