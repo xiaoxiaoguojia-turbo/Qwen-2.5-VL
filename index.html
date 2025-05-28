@@ -120,30 +120,30 @@
 
         // Returns response text (string)
         async function sendChatCompletionRequest(instruction, imageBase64URL) {
-            const response = await fetch(`${baseURL.value}/v1/chat/completions`, {
+            // 从 imageBase64URL 中提取纯 Base64 数据（去掉 "data:image/jpeg;base64," 前缀）
+            const base64Data = imageBase64URL.split(',')[1];
+    
+            const response = await fetch(`${baseURL.value}/api/generate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    max_tokens: 100,
                     model: 'qwen2.5vl:3b',
-                    messages: [
-                        { role: 'user', content: [
-                            { type: 'text', text: instruction },
-                            { type: 'image_url', image_url: {
-                                url: imageBase64URL,
-                            } }
-                        ] },
-                    ]
+                    prompt: instruction,
+                    stream: false,
+                    images: [base64Data]
                 })
             });
+    
             if (!response.ok) {
                 const errorData = await response.text();
                 return `Server error: ${response.status} - ${errorData}`;
             }
+    
             const data = await response.json();
-            return data.choices[0].message.content;
+            // Ollama API 返回的是 response 字段，而不是 choices
+            return data.response;
         }
 
         // 1. Ask for camera permission on load
