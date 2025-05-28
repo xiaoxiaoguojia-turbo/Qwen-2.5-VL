@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能视觉分析平台</title>
-    <link href="[https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"](https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css") rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         /* 基础样式 */
         body {
@@ -44,16 +44,26 @@
             cursor: pointer;
             transition: all 0.3s;
             border-bottom: 3px solid transparent;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .tab.active {
             border-color: #4299e1;
             color: #4299e1;
+            background-color: rgba(66, 153, 225, 0.1);
         }
         
         .dark .tab.active {
             border-color: #63b3ed;
             color: #63b3ed;
+            background-color: rgba(99, 179, 237, 0.1);
+        }
+        
+        .tab-icon {
+            margin-right: 0.5rem;
         }
         
         /* 视频容器样式 */
@@ -62,6 +72,10 @@
             overflow: hidden;
             border-radius: 1rem;
             background-color: #000;
+            aspect-ratio: 4/3;
+            max-height: 350px;
+            margin: 0 auto;
+            width: 90%;
         }
         
         #videoFeed {
@@ -120,8 +134,28 @@
         
         /* 图片预览 */
         .image-preview {
-            max-height: 400px;
+            max-height: 300px;
             object-fit: contain;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        /* 上传区域 */
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            max-height: 250px;
+            margin: 0 auto;
+            width: 90%;
+        }
+        
+        .upload-area:hover {
+            border-color: #4299e1;
+            background-color: rgba(66, 153, 225, 0.05);
         }
         
         /* 隐藏元素 */
@@ -146,10 +180,10 @@
     
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- 头部 -->
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">智能视觉分析平台</h1>
+        <header class="flex flex-col items-center justify-center mb-10 text-center">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4">智能视觉分析平台</h1>
             
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 mt-2">
                 <!-- 语言切换 -->
                 <select id="languageSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm">
                     <option value="zh" selected>中文</option>
@@ -159,11 +193,11 @@
                 <!-- 主题切换 -->
                 <button id="themeToggle" class="p-2 rounded-full bg-white dark:bg-gray-700 shadow-md">
                     <!-- 月亮图标 (深色模式) -->
-                    <svg id="moonIcon" xmlns="[http://www.w3.org/2000/svg"](http://www.w3.org/2000/svg") class="h-6 w-6 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
+                    <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                     </svg>
                     <!-- 太阳图标 (浅色模式) -->
-                    <svg id="sunIcon" xmlns="[http://www.w3.org/2000/svg"](http://www.w3.org/2000/svg") class="h-6 w-6 text-yellow-500 hidden" viewBox="0 0 20 20" fill="currentColor">
+                    <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500 hidden" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
                     </svg>
                 </button>
@@ -171,31 +205,60 @@
         </header>
         
         <!-- API配置 -->
-        <div class="mb-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+        <div class="mb-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md max-w-3xl mx-auto">
             <div class="flex flex-col md:flex-row md:items-center gap-4">
                 <label for="baseURL" class="text-gray-700 dark:text-gray-300 font-medium">API 地址:</label>
                 <input id="baseURL" type="text" value="http://localhost:11434" class="flex-grow px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
         </div>
         
-        <!-- 标签页导航 -->
-        <div class="tabs flex space-x-8 border-b border-gray-200 dark:border-gray-700 mb-6">
-            <div id="cameraTab" class="tab active py-3 px-1 text-lg font-medium" data-tab="camera">
-                <span class="i18n" data-key="camera">摄像头监控</span>
-            </div>
-            <div id="uploadTab" class="tab py-3 px-1 text-lg font-medium" data-tab="upload">
-                <span class="i18n" data-key="upload">图片上传</span>
+        <!-- 标签页导航 - 改为左右排列 -->
+        <div class="flex justify-center mb-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <div class="flex">
+                    <div id="cameraTab" class="tab active" data-tab="camera">
+                        <svg class="tab-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+                        </svg>
+                        <span class="i18n" data-key="camera">摄像头监控</span>
+                    </div>
+                    <div id="uploadTab" class="tab" data-tab="upload">
+                        <svg class="tab-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="i18n" data-key="upload">图片上传</span>
+                    </div>
+                </div>
             </div>
         </div>
         
         <!-- 内容区域 -->
-        <div class="tab-content">
+        <div class="tab-content max-w-5xl mx-auto">
             <!-- 摄像头监控面板 -->
             <div id="cameraPanel" class="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg breathe-effect">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- 左侧：视频显示 -->
-                    <div class="video-container aspect-w-4 aspect-h-3 h-[400px]">
-                        <video id="videoFeed" autoplay playsinline></video>
+                    <div class="flex flex-col items-center">
+                        <div class="video-container">
+                            <video id="videoFeed" autoplay playsinline></video>
+                        </div>
+                        
+                        <div class="mt-4 flex justify-between items-center w-full">
+                            <div class="flex items-center space-x-2">
+                                <label for="intervalSelect" class="text-gray-700 dark:text-gray-300">
+                                    <span class="i18n" data-key="interval">请求间隔:</span>
+                                </label>
+                                <select id="intervalSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2">
+                                    <option value="1000">1s</option>
+                                    <option value="5000" selected>5s</option>
+                                    <option value="10000">10s</option>
+                                </select>
+                            </div>
+                            
+                            <button id="startButton" class="btn-primary px-6 py-3 rounded-lg font-medium shadow-md flex items-center justify-center">
+                                <span class="i18n" data-key="start">开始</span>
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- 右侧：控制和结果 -->
@@ -220,24 +283,6 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- 控制按钮 -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <label for="intervalSelect" class="text-gray-700 dark:text-gray-300">
-                                    <span class="i18n" data-key="interval">请求间隔:</span>
-                                </label>
-                                <select id="intervalSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2">
-                                    <option value="1000">1s</option>
-                                    <option value="5000" selected>5s</option>
-                                    <option value="10000">10s</option>
-                                </select>
-                            </div>
-                            
-                            <button id="startButton" class="btn-primary px-6 py-3 rounded-lg font-medium shadow-md flex items-center justify-center">
-                                <span class="i18n" data-key="start">开始</span>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -246,11 +291,11 @@
             <div id="uploadPanel" class="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg breathe-effect hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- 左侧：上传和预览 -->
-                    <div class="flex flex-col">
+                    <div class="flex flex-col items-center">
                         <!-- 上传区域 -->
-                        <div class="mb-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors" id="dropArea">
+                        <div class="upload-area" id="dropArea">
                             <input type="file" id="imageUpload" accept="image/*" class="hidden">
-                            <svg xmlns="[http://www.w3.org/2000/svg"](http://www.w3.org/2000/svg") class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <p class="mt-2 text-gray-600 dark:text-gray-400">
@@ -265,29 +310,25 @@
                         </div>
                         
                         <!-- 图片预览 -->
-                        <div id="imagePreviewContainer" class="hidden mb-4">
+                        <div id="imagePreviewContainer" class="hidden mt-4 w-full">
                             <div class="relative">
-                                <img id="imagePreview" class="image-preview w-full rounded-lg shadow-md" alt="预览图片">
+                                <img id="imagePreview" class="image-preview rounded-lg shadow-md" alt="预览图片">
                                 <button id="removeImage" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                             </div>
-                            <p id="imageInfo" class="mt-2 text-sm text-gray-600 dark:text-gray-400"></p>
+                            <p id="imageInfo" class="mt-2 text-sm text-gray-600 dark:text-gray-400 text-center"></p>
                         </div>
                         
                         <!-- Base64输入 -->
-                        <div class="mb-4">
-                            <label for="base64Input" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                        <div class="mt-4 w-full">
+                            <label for="base64Input" class="block text-gray-700 dark:text-gray-300 font-medium mb-2 text-center">
                                 <span class="i18n" data-key="base64Input">或输入Base64图片数据:</span>
                             </label>
-                            <textarea id="base64Input" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                            <textarea id="base64Input" rows="2" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                         </div>
-                        
-                        <button id="analyzeButton" class="btn-primary px-6 py-3 rounded-lg font-medium shadow-md flex items-center justify-center mt-auto">
-                            <span class="i18n" data-key="analyze">分析图片</span>
-                        </button>
                     </div>
                     
                     <!-- 右侧：指令和结果 -->
@@ -301,16 +342,23 @@
                         </div>
                         
                         <!-- 结果显示 -->
-                        <div class="flex-grow">
+                        <div class="flex-grow mb-4">
                             <label for="uploadResponseText" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
                                 <span class="i18n" data-key="result">分析结果:</span>
                             </label>
                             <div class="relative flex-grow">
-                                <textarea id="uploadResponseText" rows="10" readonly class="w-full h-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none resize-none"></textarea>
+                                <textarea id="uploadResponseText" rows="8" readonly class="w-full h-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:outline-none resize-none"></textarea>
                                 <div id="uploadLoading" class="hidden absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80">
                                     <div class="spinner"></div>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <!-- 分析按钮 -->
+                        <div class="flex justify-center">
+                            <button id="analyzeButton" class="btn-primary px-6 py-3 rounded-lg font-medium shadow-md flex items-center justify-center w-full md:w-auto">
+                                <span class="i18n" data-key="analyze">分析图片</span>
+                            </button>
                         </div>
                     </div>
                 </div>
