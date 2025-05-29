@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能视觉分析平台</title>
+    <title>机场视觉分析平台</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         /* 基础样式 */
@@ -194,7 +194,7 @@
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- 头部 -->
         <header class="flex flex-col items-center justify-center mb-10 text-center">
-            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4">智能视觉分析平台</h1>
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4">机场视觉分析平台</h1>
             
             <div class="flex items-center space-x-4 mt-2">
                 <!-- 语言切换 -->
@@ -263,8 +263,19 @@
                                 </label>
                                 <select id="intervalSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2">
                                     <option value="1000">1s</option>
-                                    <option value="5000" selected>5s</option>
+                                    <option value="2000">2s</option>
+                                    <option value="5000">5s</option>
                                     <option value="10000">10s</option>
+                                    <option value="15000">15s</option>
+                                    <option value="20000">20s</option>
+                                    <option value="30000">30s</option>
+                                    <option value="60000">60s</option>
+                                    <option value="90000">90s</option>
+                                    <option value="120000" selected>120s</option>
+                                    <option value="180000">180s</option>
+                                    <option value="240000">240s</option>
+                                    <option value="300000">300s</option>
+                                    <option value="360000">360s</option>
                                 </select>
                             </div>
                             
@@ -276,12 +287,12 @@
                     
                     <!-- 右侧：控制和结果 -->
                     <div class="flex flex-col h-full">
-                        <!-- 指令输入 -->
+                        <!-- 提示词输入 -->
                         <div class="mb-4">
-                            <label for="instructionText" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
-                                <span class="i18n" data-key="instruction">指令:</span>
+                            <label for="promptText" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                                <span class="i18n" data-key="prompt">提示词:</span>
                             </label>
-                            <textarea id="instructionText" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                            <textarea id="promptText" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                         </div>
                         
                         <!-- 结果显示 -->
@@ -344,14 +355,14 @@
                         </div>
                     </div>
                     
-                    <!-- 右侧：指令和结果 -->
+                    <!-- 右侧：提示词和结果 -->
                     <div class="flex flex-col h-full">
-                        <!-- 指令输入 -->
+                        <!-- 提示词输入 -->
                         <div class="mb-4">
-                            <label for="uploadInstructionText" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
-                                <span class="i18n" data-key="instruction">指令:</span>
+                            <label for="uploadPromptText" class="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                                <span class="i18n" data-key="prompt">提示词:</span>
                             </label>
-                            <textarea id="uploadInstructionText" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                            <textarea id="uploadPromptText" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                         </div>
                         
                         <!-- 结果显示 -->
@@ -380,7 +391,7 @@
         
         <!-- 页脚 -->
         <footer class="mt-12 text-center text-gray-600 dark:text-gray-400 text-sm">
-            <p>&copy; 2025 智能视觉分析平台 | <span class="i18n" data-key="poweredBy">基于 Qwen-2.5-VL 模型</span></p>
+            <p>&copy; 2025 机场视觉分析平台 | <span class="i18n" data-key="poweredBy">基于 Qwen-2.5-VL 模型</span></p>
         </footer>
     </div>
 
@@ -388,10 +399,10 @@
         // 语言配置
         const translations = {
             zh: {
-                appTitle: "智能视觉分析平台",
+                appTitle: "机场视觉分析平台",
                 camera: "摄像头监控",
                 upload: "图片上传",
-                instruction: "指令:",
+                prompt: "提示词:",
                 result: "分析结果:",
                 interval: "请求间隔:",
                 start: "开始",
@@ -415,10 +426,10 @@
                 cameraReady: "摄像头访问正常，可以开始处理了。"
             },
             en: {
-                appTitle: "Intelligent Visual Analysis Platform",
+                appTitle: "Airport Visual Analysis Platform",
                 camera: "Camera Monitoring",
                 upload: "Image Upload",
-                instruction: "Instruction:",
+                prompt: "Prompt:",
                 result: "Analysis Result:",
                 interval: "Request Interval:",
                 start: "Start",
@@ -464,7 +475,7 @@
             // 摄像头相关
             videoFeed: document.getElementById('videoFeed'),
             canvas: document.getElementById('canvas'),
-            instructionText: document.getElementById('instructionText'),
+            promptText: document.getElementById('promptText'),
             responseText: document.getElementById('responseText'),
             intervalSelect: document.getElementById('intervalSelect'),
             startButton: document.getElementById('startButton'),
@@ -478,7 +489,7 @@
             removeImage: document.getElementById('removeImage'),
             imageInfo: document.getElementById('imageInfo'),
             base64Input: document.getElementById('base64Input'),
-            uploadInstructionText: document.getElementById('uploadInstructionText'),
+            uploadPromptText: document.getElementById('uploadPromptText'),
             uploadResponseText: document.getElementById('uploadResponseText'),
             analyzeButton: document.getElementById('analyzeButton'),
             uploadLoading: document.getElementById('uploadLoading')
@@ -492,9 +503,9 @@
         
         // 初始化函数
         function init() {
-            // 设置默认指令
-            elements.instructionText.value = "用中文描述你看到了什么";
-            elements.uploadInstructionText.value = "用中文描述这张图片";
+            // 设置默认提示词
+            elements.promptText.value = "请使用中文，描述你看到了什么？";
+            elements.uploadPromptText.value = "请使用中文，描述这张图片。";
             
             // 初始化语言
             updateLanguage(currentLanguage);
@@ -638,7 +649,7 @@
             elements.startButton.classList.remove('bg-blue-500', 'hover:bg-blue-600');
             elements.startButton.classList.add('bg-red-500', 'hover:bg-red-600');
             
-            elements.instructionText.disabled = true;
+            elements.promptText.disabled = true;
             elements.intervalSelect.disabled = true;
             
             elements.responseText.value = translations[currentLanguage].processingStarted;
@@ -665,7 +676,7 @@
             elements.startButton.classList.remove('bg-red-500', 'hover:bg-red-600');
             elements.startButton.classList.add('bg-blue-500', 'hover:bg-blue-600');
             
-            elements.instructionText.disabled = false;
+            elements.promptText.disabled = false;
             elements.intervalSelect.disabled = false;
             
             if (elements.responseText.value === translations[currentLanguage].processingStarted) {
@@ -692,7 +703,7 @@
         async function sendData() {
             if (!isProcessing) return; // 确保不会有重叠的请求
             
-            const instruction = elements.instructionText.value;
+            const prompt = elements.promptText.value;
             const imageBase64URL = captureImage();
             
             if (!imageBase64URL) {
@@ -703,7 +714,7 @@
             elements.cameraLoading.classList.remove('hidden');
             
             try {
-                const response = await sendChatCompletionRequest(instruction, imageBase64URL);
+                const response = await sendChatCompletionRequest(prompt, imageBase64URL);
                 elements.responseText.value = response;
             } catch (error) {
                 console.error('Error sending data:', error);
@@ -714,7 +725,7 @@
         }
         
         // 发送API请求
-        async function sendChatCompletionRequest(instruction, imageBase64URL) {
+        async function sendChatCompletionRequest(prompt, imageBase64URL) {
             // 从imageBase64URL中提取纯Base64数据（去掉"data:image/jpeg;base64,"前缀）
             const base64Data = imageBase64URL.split(',')[1];
             
@@ -725,7 +736,7 @@
                 },
                 body: JSON.stringify({
                     model: 'qwen2.5vl:3b',
-                    prompt: instruction,
+                    prompt: prompt,
                     stream: false,
                     images: [base64Data]
                 })
@@ -826,7 +837,7 @@
                 return;
             }
             
-            const instruction = elements.uploadInstructionText.value;
+            const prompt = elements.uploadPromptText.value;
             
             // 显示加载状态
             elements.uploadLoading.classList.remove('hidden');
@@ -834,7 +845,7 @@
             elements.analyzeButton.disabled = true;
             
             try {
-                const response = await sendChatCompletionRequest(instruction, imageData);
+                const response = await sendChatCompletionRequest(prompt, imageData);
                 elements.uploadResponseText.value = response;
             } catch (error) {
                 console.error('Error analyzing image:', error);
