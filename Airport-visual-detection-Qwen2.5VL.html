@@ -22,7 +22,7 @@
         }
         
         .dark .bg-gradient-custom {
-            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
         }
         
         /* 呼吸动画 */
@@ -172,6 +172,19 @@
             .tabs {
                 flex-direction: column;
             }
+        }
+        
+        /* 深色模式下标题和文本增强 */
+        .dark h1.text-gray-800 {
+            color: #f3f4f6 !important;
+        }
+        
+        .dark .text-gray-700 {
+            color: #e5e7eb !important;
+        }
+        
+        .dark .text-gray-600 {
+            color: #d1d5db !important;
         }
     </style>
 </head>
@@ -396,7 +409,10 @@
                 uploadImage: "请上传图片或输入Base64数据",
                 analyzing: "分析中...",
                 fileInfo: "文件名: {0}, 大小: {1} KB",
-                largeFileWarning: "警告: 图片大于800KB，可能导致请求缓慢。"
+                largeFileWarning: "警告: 图片大于800KB，可能导致请求缓慢。",
+                base64Loaded: "Base64数据已加载",
+                pleaseUploadImage: "请上传图片文件",
+                cameraReady: "摄像头访问正常，可以开始处理了。"
             },
             en: {
                 appTitle: "Intelligent Visual Analysis Platform",
@@ -420,7 +436,10 @@
                 uploadImage: "Please upload an image or input Base64 data",
                 analyzing: "Analyzing...",
                 fileInfo: "Filename: {0}, Size: {1} KB",
-                largeFileWarning: "Warning: Image is larger than 800KB, which may cause slow requests."
+                largeFileWarning: "Warning: Image is larger than 800KB, which may cause slow requests.",
+                base64Loaded: "Base64 data loaded",
+                pleaseUploadImage: "Please upload an image file",
+                cameraReady: "Camera access is normal, ready to start processing."
             }
         };
         
@@ -589,7 +608,7 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 elements.videoFeed.srcObject = stream;
-                elements.responseText.value = "摄像头访问正常，可以开始处理了。";
+                elements.responseText.value = translations[currentLanguage].cameraReady;
             } catch (err) {
                 console.error("Error accessing camera:", err);
                 elements.responseText.value = `Error accessing camera: ${err.name} - ${err.message}. Please ensure permissions are granted and you are on HTTPS or localhost.`;
@@ -733,7 +752,7 @@
         function handleFiles(files) {
             const file = files[0];
             if (!file.type.startsWith('image/')) {
-                alert('请上传图片文件');
+                alert(translations[currentLanguage].pleaseUploadImage);
                 return;
             }
             
@@ -782,7 +801,7 @@
                 elements.imagePreviewContainer.classList.remove('hidden');
                 
                 // 显示信息
-                elements.imageInfo.textContent = 'Base64数据已加载';
+                elements.imageInfo.textContent = translations[currentLanguage].base64Loaded;
             } catch (error) {
                 console.error('Error parsing Base64:', error);
                 alert('无效的Base64数据');
