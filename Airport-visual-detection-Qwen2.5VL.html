@@ -194,7 +194,7 @@
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- 头部 -->
         <header class="flex flex-col items-center justify-center mb-10 text-center">
-            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4">机场视觉分析平台</h1>
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-4 i18n" data-key="appTitle">机场视觉分析平台</h1>
             
             <div class="flex items-center space-x-4 mt-2">
                 <!-- 语言切换 -->
@@ -220,7 +220,7 @@
         <!-- API配置 -->
         <div class="mb-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md max-w-3xl mx-auto">
             <div class="flex flex-col md:flex-row md:items-center gap-4">
-                <label for="baseURL" class="text-gray-700 dark:text-gray-300 font-medium">API 地址:</label>
+                <label for="baseURL" class="text-gray-700 dark:text-gray-300 font-medium i18n" data-key="apiAddress">API 地址:</label>
                 <input id="baseURL" type="text" value="http://localhost:11434" class="flex-grow px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
         </div>
@@ -400,6 +400,7 @@
         const translations = {
             zh: {
                 appTitle: "机场视觉分析平台",
+                apiAddress: "API 地址:",
                 camera: "摄像头监控",
                 upload: "图片上传",
                 prompt: "提示词:",
@@ -427,6 +428,7 @@
             },
             en: {
                 appTitle: "Airport Visual Analysis Platform",
+                apiAddress: "API Address:",
                 camera: "Camera Monitoring",
                 upload: "Image Upload",
                 prompt: "Prompt:",
@@ -573,7 +575,7 @@
                 }
             });
             
-            // 更新标题
+            // 更新标题（这里指的是导航栏的标题，不是页面的标题）
             document.title = translations[lang].appTitle;
             
             // 更新按钮文本
