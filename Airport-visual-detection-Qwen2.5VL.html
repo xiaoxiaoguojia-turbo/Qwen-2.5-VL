@@ -391,7 +391,7 @@
         
         <!-- 页脚 -->
         <footer class="mt-12 text-center text-gray-600 dark:text-gray-400 text-sm">
-            <p>&copy; 2025 机场视觉分析平台 | <span class="i18n" data-key="poweredBy">基于 Qwen-2.5-VL 模型</span></p>
+            <p>&copy; 2025 <span class="i18n" data-key="footer">机场视觉分析平台</span> | <span class="i18n" data-key="poweredBy">基于 Qwen-2.5-VL 模型</span></p>
         </footer>
     </div>
 
@@ -413,6 +413,7 @@
                 browseFiles: "浏览文件",
                 supportedFormats: "支持 JPG, PNG, GIF 等格式",
                 base64Input: "或输入Base64图片数据:",
+                footer: "机场视觉分析平台",
                 poweredBy: "基于 Qwen-2.5-VL 模型",
                 processingStarted: "处理已开始...",
                 processingStopped: "处理已停止。",
@@ -441,6 +442,7 @@
                 browseFiles: "Browse Files",
                 supportedFormats: "Supports JPG, PNG, GIF formats",
                 base64Input: "Or input Base64 image data:",
+                footer: "Airport Visual Analysis Platform",
                 poweredBy: "Powered by Qwen-2.5-VL Model",
                 processingStarted: "Processing started...",
                 processingStopped: "Processing stopped.",
@@ -502,6 +504,8 @@
         let intervalId;
         let isProcessing = false;
         let isDarkMode = false;
+        let currentFileName = '';
+        let currentFileSize = '';
         
         // 初始化函数
         function init() {
@@ -583,6 +587,11 @@
                 elements.startButton.querySelector('span').textContent = translations[lang].stop;
             } else {
                 elements.startButton.querySelector('span').textContent = translations[lang].start;
+            }
+            
+            // 更新上传的图片信息（如果有）W
+            if (elements.imageInfo && currentFileName && currentFileSize) {
+                elements.imageInfo.textContent = translations[lang].fileInfo.replace('{0}', currentFileName).replace('{1}', currentFileSize);
             }
         }
         
@@ -764,6 +773,9 @@
         // 处理文件
         function handleFiles(files) {
             const file = files[0];
+            currentFileName = file.name;
+            currentFileSize = (file.size / 1024).toFixed(2);
+
             if (!file.type.startsWith('image/')) {
                 alert(translations[currentLanguage].pleaseUploadImage);
                 return;
@@ -773,8 +785,7 @@
             elements.base64Input.value = '';
             
             // 显示文件信息
-            const fileSizeKB = (file.size / 1024).toFixed(2);
-            elements.imageInfo.textContent = translations[currentLanguage].fileInfo.replace('{0}', file.name).replace('{1}', fileSizeKB);
+            elements.imageInfo.textContent = translations[currentLanguage].fileInfo.replace('{0}', currentFileName).replace('{1}', currentFileSize);
             
             // 大文件警告
             if (file.size > 800 * 1024) {
