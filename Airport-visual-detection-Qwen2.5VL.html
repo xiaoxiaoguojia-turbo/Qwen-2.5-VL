@@ -175,16 +175,61 @@
         }
         
         /* 深色模式下标题和文本增强 */
+        .dark h1 {
+            color: #7f93b3 !important;
+        }
         .dark h1.text-gray-800 {
-            color: #f3f4f6 !important;
+            color: #7f93b3 !important;
+        }
+        
+        .dark h2 {
+            color: #7f93b3 !important;
+        }
+        .dark h2.text-gray-800 {
+            color: #7f93b3 !important;
+        }
+        
+        .dark h3 {
+            color: #7f93b3 !important;
+        }
+        .dark h3.text-gray-800 {
+            color: #7f93b3 !important;
+        }
+        
+        .dark .text-gray-900 {
+            color: #7f93b3 !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #7f93b3 !important;
         }
         
         .dark .text-gray-700 {
-            color: #e5e7eb !important;
+            color: #7f93b3 !important;
         }
         
         .dark .text-gray-600 {
-            color: #d1d5db !important;
+            color: #7f93b3 !important;
+        }
+
+        .dark .text-gray-500 {
+            color: #7f93b3 !important;
+        }
+        
+        .dark .text-gray-400 {
+            color: #7f93b3 !important;
+        }
+        
+        .dark .text-gray-300 {
+            color: #7f93b3 !important;
+        }
+        
+        .dark .text-gray-200 {
+            color: #7f93b3 !important;
+        }
+        
+        .dark .text-gray-100 {
+            color: #7f93b3 !important;
         }
     </style>
 </head>
@@ -198,7 +243,7 @@
             
             <div class="flex items-center space-x-4 mt-2">
                 <!-- 语言切换 -->
-                <select id="languageSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm">
+                <select id="languageSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm text-gray-800 dark:text-white">
                     <option value="zh" selected>中文</option>
                     <option value="en">English</option>
                 </select>
@@ -233,13 +278,13 @@
                         <svg class="tab-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
                         </svg>
-                        <span class="i18n" data-key="camera">摄像头监控</span>
+                        <span class="i18n text-gray-800 dark:text-white" data-key="camera">摄像头监控</span>
                     </div>
                     <div id="uploadTab" class="tab" data-tab="upload">
                         <svg class="tab-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
                         </svg>
-                        <span class="i18n" data-key="upload">图片上传</span>
+                        <span class="i18n text-gray-800 dark:text-white" data-key="upload">图片上传</span>
                     </div>
                 </div>
             </div>
@@ -261,7 +306,7 @@
                                 <label for="intervalSelect" class="text-gray-700 dark:text-gray-300">
                                     <span class="i18n" data-key="interval">请求间隔:</span>
                                 </label>
-                                <select id="intervalSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2">
+                                <select id="intervalSelect" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-gray-800 dark:text-white">
                                     <option value="1000">1s</option>
                                     <option value="2000">2s</option>
                                     <option value="5000">5s</option>
@@ -589,7 +634,7 @@
                 elements.startButton.querySelector('span').textContent = translations[lang].start;
             }
             
-            // 更新上传的图片信息（如果有）W
+            // 更新上传的图片信息（如果有）
             if (elements.imageInfo && currentFileName && currentFileSize) {
                 elements.imageInfo.textContent = translations[lang].fileInfo.replace('{0}', currentFileName).replace('{1}', currentFileSize);
             }
