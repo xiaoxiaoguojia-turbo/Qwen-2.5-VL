@@ -770,7 +770,7 @@
             elements.cameraLoading.classList.remove('hidden');
             
             try {
-                const response = await sendChatCompletionRequest(prompt, imageBase64URL);
+                const response = await sendChatCompletionRequest_ali_Bailian(prompt, imageBase64URL);
                 elements.responseText.value = response;
             } catch (error) {
                 console.error('Error sending data:', error);
@@ -806,6 +806,36 @@
             const data = await response.json();
             // Ollama API返回的是response字段
             return data.response;
+        }
+        
+        // 发送API请求-阿里百炼云端模型
+        async function sendChatCompletionRequest_ali_Bailian(prompt, imageBase64URL) {
+            const response = await fetch(`https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer sk-77c17854a3b34169a447e53ff2357bd0',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "model": "qwen-vl-plus",
+                    "messages": [{
+                        "role": "user",
+                        "content": [
+                            {"type": "image_url","image_url": {"url": imageBase64URL}},
+                            {"type": "text","text": prompt}
+                        ]}
+                    ]
+                })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.text();
+                return `Server error: ${response.status} - ${errorData}`;
+            }
+            
+            const data = await response.json();
+            // 阿里百炼返回的是choices字段，与OpenAI API返回的格式一致
+            return data.choices[0].message.content;
         }
         
         // 处理图片上传
